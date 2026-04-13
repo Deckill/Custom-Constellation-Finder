@@ -104,8 +104,8 @@
 
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
+        canvas.style.width = "1280px";
+        canvas.style.height = "720px";
       }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
@@ -116,12 +116,26 @@
         createUnityInstance(canvas, config, (progress) => {
           document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
               }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
+    document.querySelector("#unity-loading-bar").style.display = "none";
+    
+    document.querySelector("#unity-fullscreen-button").onclick = () => {
+        // 1. 유니티 전체화면 실행
+        unityInstance.SetFullscreen(1);
 
-              }).catch((message) => {
+        // 2. 모바일인 경우 화면 방향 고정 시도
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            if (screen.orientation && screen.orientation.lock) {
+                // 브라우저가 Orientation API를 지원하는 경우 가로 모드 고정
+                screen.orientation.lock('landscape').catch(function(error) {
+                    console.log("화면 방향 고정 실패: " + error);
+                });
+            } else if (screen.lockOrientation) {
+                // 구형 브라우저 대응
+                screen.lockOrientation('landscape');
+            }
+        }
+    };
+}).catch((message) => {
                 alert(message);
               });
             };
